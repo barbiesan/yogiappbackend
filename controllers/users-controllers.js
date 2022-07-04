@@ -1,4 +1,3 @@
-const { uuid } = require('uuidv4');
 const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
@@ -10,12 +9,12 @@ const getUsers = async (req, res, next) => {
     users = await User.find({}, '-password');
   } catch (err) {
     const error = new HttpError(
-      'Error.',
+      'Fetching users failed, please try again later.',
       500
     );
     return next(error);
   }
-  res.json({users: users.map(user => user.toObject({ getters: true }))});
+  res.json({ users: users.map(user => user.toObject({ getters: true })) });
 };
 
 const signup = async (req, res, next) => {
@@ -27,9 +26,9 @@ const signup = async (req, res, next) => {
   }
   const { name, email, password } = req.body;
 
-  let existingUser
+  let existingUser;
   try {
-    existingUser = await User.findOne({ email: email })
+    existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
       'Signing up failed, please try again later.',
@@ -37,7 +36,7 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-  
+
   if (existingUser) {
     const error = new HttpError(
       'User exists already, please login instead.',
@@ -45,11 +44,11 @@ const signup = async (req, res, next) => {
     );
     return next(error);
   }
-  
+
   const createdUser = new User({
     name,
     email,
-    image: 'https://scontent.frix7-1.fna.fbcdn.net/v/t39.30808-6/275066760_10159671023899291_1520049015563555871_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=e3f864&_nc_ohc=8KxvEAQ6KbAAX_qkUpX&_nc_ht=scontent.frix7-1.fna&oh=00_AT8Wwx70VcIWDVscHI4cbKx6PwQxB9r4Jw2cFczmaF1s4A&oe=62C62AF2',
+    image: 'https://via.placeholder.com/300.png/09f/fff',
     password,
     places: []
   });
@@ -58,13 +57,13 @@ const signup = async (req, res, next) => {
     await createdUser.save();
   } catch (err) {
     const error = new HttpError(
-      'Signing up failed, please try again.',
+      'Signing up failed, try again later.',
       500
     );
     return next(error);
   }
 
-  res.status(201).json({user: createdUser.toObject({ getters: true })});
+  res.status(201).json({ user: createdUser.toObject({ getters: true }) });
 };
 
 const login = async (req, res, next) => {
@@ -73,10 +72,10 @@ const login = async (req, res, next) => {
   let existingUser;
 
   try {
-    existingUser = await User.findOne({ email: email })
+    existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      'Logging in failed, please try again later.',
+      'Loggin in failed, please try again later.',
       500
     );
     return next(error);
@@ -90,7 +89,10 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({message: 'Logged in!'});
+  res.json({
+    message: 'Logged in!',
+    user: existingUser.toObject({ getters: true })
+  });
 };
 
 exports.getUsers = getUsers;
